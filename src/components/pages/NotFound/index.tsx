@@ -1,9 +1,7 @@
 import "./style.less";
 
-import Page from "../../layout/Page/index.js";
-
 function NotFound() {
-  return <Page className="NotFound">NotFound</Page>;
+  return <div>NotFound</div>;
 }
 
 export default NotFound;
