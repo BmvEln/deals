@@ -1,9 +1,9 @@
 export const DEAL_STATUS_KEYS = {
-  NEW: "new",
-  IN_PROGRESS: "in_progress",
-  ALMOST_DONE: "almost_done",
-  SUCCESS: "success",
-  FAILED: "failed",
+  NEW: "NEW",
+  IN_PROGRESS: "IN_PROGRESS",
+  ALMOST_DONE: "ALMOST_DONE",
+  SUCCESS: "SUCCESS",
+  FAILED: "FAILED",
 } as const;
 
 export const DEAL_STATUSES_CONFIG: Record<

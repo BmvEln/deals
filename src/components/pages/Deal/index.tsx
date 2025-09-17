@@ -1,5 +1,4 @@
 import React, {
-  type CSSProperties,
   useCallback,
   useEffect,
   useMemo,
@@ -9,8 +8,11 @@ import React, {
 import { useParams } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "../../../redux/store.tsx";
 
+import "./style.less";
+
 import type { DealPT } from "../../../types.ts";
 import {
+  DEAL_STATUS_KEYS,
   DEAL_STATUSES_CONFIG,
   DEAL_STATUSES_LIST,
 } from "../../../static/deals.ts";
@@ -19,15 +21,13 @@ import {
   updateDeal,
 } from "../../../redux/slices/dealsSlice.tsx";
 
-import "./style.less";
-
 import Header from "../../layout/Header";
 import Input from "../../controls/Input";
 import Select from "../../controls/Select";
 import Button from "../../controls/Button";
-
 import NotFound from "../NotFound";
 
+// <editor-fold desc="Типы и константы">
 type InputBlockDataType = {
   fieldName: keyof DealPT;
   title: string;
@@ -35,6 +35,16 @@ type InputBlockDataType = {
   unit?: string;
 };
 
+const INPUT_BLOCK_DATA: InputBlockDataType[] = [
+  { title: "Статус", fieldName: "status", isSelect: true },
+  { title: "Номер телефона", fieldName: "phone" },
+  { title: "Бюджет", fieldName: "budget", unit: "руб." },
+  { title: "ФИО", fieldName: "fullName" },
+  { title: "Дата создания", fieldName: "createdAt" },
+];
+// </editor-fold>
+
+// <editor-fold desc="Компоненты">
 type InputBlock = {
   title: string;
   isSelect?: boolean;
@@ -109,6 +119,87 @@ function InputBlock({
   );
 }
 
+type Comments = {
+  state: string;
+  setState: (state: string) => void;
+  addComment: (e: React.KeyboardEvent<HTMLInputElement>) => void;
+  dealCommentsContentRef: React.Ref<HTMLDivElement>;
+  deal: DealPT;
+};
+
+function Comments({
+  state,
+  setState,
+  addComment,
+  dealCommentsContentRef,
+  deal,
+}: Comments) {
+  return (
+    <div>
+      <div className="DealComment">
+        <div>Комментарий</div>
+
+        <Input
+          className="white"
+          value={state}
+          onChange={(v) => setState(v)}
+          placeholder="Введите комментарий"
+          onKeyDown={addComment}
+        />
+      </div>
+      <div className="DealComments">
+        <div className="DealCommentsContent" ref={dealCommentsContentRef}>
+          {!deal.comments.length ? (
+            <div
+              style={{ fontSize: "24px", lineHeight: "100%" }}
+              className="notContent"
+            >
+              Комментария не добавлены
+            </div>
+          ) : (
+            deal.comments.map((comment: string, i: number) => (
+              <div key={i}>{comment}</div>
+            ))
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+type StatusBlockType = {
+  status: keyof typeof DEAL_STATUS_KEYS;
+};
+
+function StatusBlock({ status }: StatusBlockType) {
+  return (
+    <div className="DealStatus">
+      <div>Статус</div>
+      <div
+        style={{
+          ...({
+            "--value": DEAL_STATUSES_CONFIG[status].progressValue * 100 + "%",
+          } as React.CSSProperties),
+          ...({
+            "--progressColor": DEAL_STATUSES_CONFIG[status].color,
+          } as React.CSSProperties),
+        }}
+      />
+
+      <div>
+        <div
+          style={{
+            width: DEAL_STATUSES_CONFIG[status].progressValue * 100 + "%",
+          }}
+        >
+          {DEAL_STATUSES_CONFIG[status].name}
+        </div>
+      </div>
+    </div>
+  );
+}
+// </editor-fold>
+
 function Deal() {
   const { id } = useParams();
   const dispatch = useAppDispatch();
@@ -122,14 +213,6 @@ function Deal() {
   const [editStates, setEditStates] = useState<Record<string, boolean>>({});
   const [comment, setComment] = useState("");
   const dealCommentsContentRef = useRef<HTMLDivElement>(null);
-
-  const INPUT_BLOCK_DATA: InputBlockDataType[] = [
-    { title: "Статус", fieldName: "status", isSelect: true },
-    { title: "Номер телефона", fieldName: "phone" },
-    { title: "Бюджет", fieldName: "budget", unit: "руб." },
-    { title: "ФИО", fieldName: "fullName" },
-    { title: "Дата создания", fieldName: "createdAt" },
-  ];
 
   const toggleEdit = useCallback((fieldName: string) => {
     setEditStates((prev) => ({
@@ -209,31 +292,7 @@ function Deal() {
         <div className="DealContent">
           <div className="DealHeading">{deal.name}</div>
 
-          <div className="DealStatus">
-            <div>Статус</div>
-            <div
-              style={{
-                ...({
-                  "--value":
-                    DEAL_STATUSES_CONFIG[deal.status].progressValue * 100 + "%",
-                } as CSSProperties),
-                ...({
-                  "--progressColor": DEAL_STATUSES_CONFIG[deal.status].color,
-                } as CSSProperties),
-              }}
-            />
-
-            <div>
-              <div
-                style={{
-                  width:
-                    DEAL_STATUSES_CONFIG[deal.status].progressValue * 100 + "%",
-                }}
-              >
-                {DEAL_STATUSES_CONFIG[deal.status].name}
-              </div>
-            </div>
-          </div>
+          <StatusBlock status={deal.status} />
 
           <div className="DealDivision">
             <div>
@@ -251,38 +310,14 @@ function Deal() {
                 />
               ))}
             </div>
-            <div>
-              <div className="DealComment">
-                <div>Комментарий</div>
 
-                <Input
-                  className="white"
-                  value={comment}
-                  onChange={(v) => setComment(v)}
-                  placeholder="Введите комментарий"
-                  onKeyDown={addComment}
-                />
-              </div>
-              <div className="DealComments">
-                <div
-                  className="DealCommentsContent"
-                  ref={dealCommentsContentRef}
-                >
-                  {!deal.comments.length ? (
-                    <div
-                      style={{ fontSize: "24px", lineHeight: "100%" }}
-                      className="notContent"
-                    >
-                      Комментария не добавлены
-                    </div>
-                  ) : (
-                    deal.comments.map((comment: string, i: number) => (
-                      <div key={i}>{comment}</div>
-                    ))
-                  )}
-                </div>
-              </div>
-            </div>
+            <Comments
+              state={comment}
+              setState={setComment}
+              addComment={addComment}
+              dealCommentsContentRef={dealCommentsContentRef}
+              deal={deal}
+            />
           </div>
 
           {!isFieldChanges ? null : (
