@@ -1,5 +1,6 @@
-import "./style.less";
 import type { ReactNode } from "react";
+
+import "./style.less";
 
 function Header({ children }: { children: ReactNode }) {
   return (

@@ -28,14 +28,14 @@ import Button from "../../controls/Button";
 import NotFound from "../NotFound";
 
 // <editor-fold desc="Типы и константы">
-type InputBlockDataType = {
+type InputBlockDataProps = {
   fieldName: keyof DealPT;
   title: string;
   isSelect?: boolean;
   unit?: string;
 };
 
-const INPUT_BLOCK_DATA: InputBlockDataType[] = [
+const INPUT_BLOCK_DATA: InputBlockDataProps[] = [
   { title: "Статус", fieldName: "status", isSelect: true },
   { title: "Номер телефона", fieldName: "phone" },
   { title: "Бюджет", fieldName: "budget", unit: "руб." },
@@ -45,7 +45,7 @@ const INPUT_BLOCK_DATA: InputBlockDataType[] = [
 // </editor-fold>
 
 // <editor-fold desc="Компоненты">
-type InputBlock = {
+type InputBlockProps = {
   title: string;
   isSelect?: boolean;
   value: number | string | string[];
@@ -65,7 +65,7 @@ function InputBlock({
   unit,
   isEdit,
   onToggleEdit,
-}: InputBlock) {
+}: InputBlockProps) {
   const changeField = useCallback(
     (v: string | number) => {
       onChange(fieldName, v);
@@ -119,7 +119,7 @@ function InputBlock({
   );
 }
 
-type Comments = {
+type CommentsProps = {
   state: string;
   setState: (state: string) => void;
   addComment: (e: React.KeyboardEvent<HTMLInputElement>) => void;
@@ -133,7 +133,7 @@ function Comments({
   addComment,
   dealCommentsContentRef,
   deal,
-}: Comments) {
+}: CommentsProps) {
   return (
     <div>
       <div className="DealComment">
@@ -167,11 +167,11 @@ function Comments({
   );
 }
 
-type StatusBlockType = {
+type StatusBlockProps = {
   status: keyof typeof DEAL_STATUS_KEYS;
 };
 
-function StatusBlock({ status }: StatusBlockType) {
+function StatusBlock({ status }: StatusBlockProps) {
   return (
     <div className="DealStatus">
       <div>Статус</div>
