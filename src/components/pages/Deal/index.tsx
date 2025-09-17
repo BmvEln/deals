@@ -254,7 +254,7 @@ function Deal() {
             <div>
               <div className="DealComment">
                 <div>Комментарий</div>
-                npm run build
+
                 <Input
                   className="white"
                   value={comment}

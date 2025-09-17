@@ -15,7 +15,6 @@ function App() {
       <Routes>
         <Route path={HOME_LINK} element={<Home />} />
         <Route path={DEAL_LINK} element={<Deal />} />
-        <Route path="/deals/:id" element={<Deal />} />
         <Route path={DEALS_LINK} element={<Deals />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
