@@ -23,7 +23,7 @@ const initialState: { deals: DealPT[] } = {
     {
       id: 2,
       status: "success",
-      name: "Название сделки Название сделки",
+      name: "Название сделки",
       phone: undefined,
       budget: undefined,
       fullName: undefined,
