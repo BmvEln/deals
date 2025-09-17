@@ -1,0 +1,106 @@
+.Deals {
+  padding: 64px 42px 28px 35px;
+
+  width: 1843px;
+  height: calc(100vh - var(--headerHeight) - 64px - 28px);
+
+  box-sizing: content-box;
+
+  &Content {
+    width: 100%;
+    height: 100%;
+  }
+
+  &Tabs {
+    display: flex;
+
+    margin-bottom: 42px;
+  }
+
+  &Table {
+    background-color: #ebebeb;
+
+    > div {
+      display: grid;
+      grid-template-columns: 148px 653px 647px 1fr;
+
+      > div {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        padding: 20px 16px;
+
+        font-size: 36px;
+        line-height: 100%;
+      }
+    }
+
+    > a {
+      position: relative;
+
+      display: block;
+      height: 85px;
+
+      > div {
+        position: absolute;
+        top: calc(50% - 18px);
+
+        font-size: 36px;
+        line-height: 100%;
+
+        &:nth-child(1) {
+          left: 60px;
+        }
+
+        &:nth-child(2) {
+          white-space: nowrap;
+          display: -webkit-box;
+          -webkit-line-clamp: 1;
+          -webkit-box-orient: vertical;
+          overflow: hidden;
+          text-overflow: ellipsis;
+
+          max-width: 600px;
+          left: 390px;
+        }
+
+        &:nth-child(3) {
+          left: 1066px;
+        }
+
+        &:nth-child(4) {
+          right: 136px;
+        }
+      }
+    }
+
+    > div:first-child {
+      border-bottom: 1px solid #fff;
+    }
+  }
+
+  &Window {
+    > div:nth-child(1) {
+      font-size: 36px;
+      line-height: 130%;
+
+      margin-bottom: 24px;
+    }
+
+    > div:nth-child(2) {
+      font-size: 24px;
+      line-height: 130%;
+
+      margin-bottom: 20px;
+    }
+
+    > .Input {
+      margin-bottom: 28px;
+    }
+
+    > div:last-child {
+      display: flex;
+    }
+  }
+}
