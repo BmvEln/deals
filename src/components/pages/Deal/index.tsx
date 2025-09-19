@@ -16,10 +16,7 @@ import {
   DEAL_STATUSES_CONFIG,
   DEAL_STATUSES_LIST,
 } from "../../../static/deals.ts";
-import {
-  addCommentDeal,
-  updateDeal,
-} from "../../../redux/slices/dealsSlice.tsx";
+import { updateDeal } from "../../../redux/slices/dealsSlice.tsx";
 
 import Header from "../../layout/Header";
 import Input from "../../controls/Input";
@@ -124,7 +121,7 @@ type CommentsProps = {
   setState: (state: string) => void;
   addComment: (e: React.KeyboardEvent<HTMLInputElement>) => void;
   dealCommentsContentRef: React.Ref<HTMLDivElement>;
-  deal: DealPT;
+  comments: string[] | [];
 };
 
 function Comments({
@@ -132,7 +129,7 @@ function Comments({
   setState,
   addComment,
   dealCommentsContentRef,
-  deal,
+  comments,
 }: CommentsProps) {
   return (
     <div>
@@ -149,15 +146,15 @@ function Comments({
       </div>
       <div className="DealComments">
         <div className="DealCommentsContent" ref={dealCommentsContentRef}>
-          {!deal.comments.length ? (
+          {!comments.length ? (
             <div
-              style={{ fontSize: "24px", lineHeight: "100%" }}
+              style={{ fontSize: "24px", lineHeight: "130%" }}
               className="notContent"
             >
               Комментария не добавлены
             </div>
           ) : (
-            deal.comments.map((comment: string, i: number) => (
+            comments.map((comment: string, i: number) => (
               <div key={i}>{comment}</div>
             ))
           )}
@@ -200,6 +197,7 @@ function StatusBlock({ status }: StatusBlockProps) {
 }
 // </editor-fold>
 
+// избавиться от стейта комментария
 function Deal() {
   const { id } = useParams();
   const dispatch = useAppDispatch();
@@ -207,8 +205,7 @@ function Deal() {
   const { deals } = useAppSelector((state) => state.deals),
     deal = deals.find((deal: DealPT) => id === String(deal.id));
 
-  const [dealFormData, setDealFormData] = useState(deal),
-    originalDealRef = useRef(deal);
+  const [dealFormData, setDealFormData] = useState(deal);
 
   const [editStates, setEditStates] = useState<Record<string, boolean>>({});
   const [comment, setComment] = useState("");
@@ -219,11 +216,11 @@ function Deal() {
       // Если поле было в режиме редактирования, сбрасываем его значение
       if (editStates[fieldName]) {
         setDealFormData((prev) => {
-          if (!prev || !originalDealRef.current) return prev;
+          if (!prev || !deal) return prev;
 
           return {
             ...prev,
-            [fieldName]: originalDealRef.current[fieldName],
+            [fieldName]: deal[fieldName],
           };
         });
       }
@@ -239,9 +236,15 @@ function Deal() {
   const addComment = useCallback(
     (e: React.KeyboardEvent<HTMLInputElement>) => {
       if (e.key === "Enter" && comment.trim()) {
-        dispatch(
-          addCommentDeal({ dealId: Number(id), comment: comment.trim() }),
-        );
+        setDealFormData((prev: DealPT | undefined) => {
+          if (!prev) return prev;
+
+          return {
+            ...prev,
+            comments: [...(prev.comments || []), comment],
+          };
+        });
+        setComment("");
       }
     },
     [comment],
@@ -263,34 +266,33 @@ function Deal() {
   const saveDeal = useCallback(() => {
     if (dealFormData) {
       dispatch(updateDeal(dealFormData));
-      originalDealRef.current = dealFormData;
       setEditStates({});
     }
   }, [dealFormData]);
 
   const cancelUpdate = useCallback(() => {
-    setDealFormData(originalDealRef.current);
+    setDealFormData(deal);
     setEditStates({});
   }, []);
 
   const isFieldChanges = useMemo(() => {
-    if (!dealFormData || !originalDealRef.current) return false;
+    if (!dealFormData || !deal) return false;
 
-    const originalDeal = originalDealRef.current,
-      keys = Object.keys(originalDeal) as Array<keyof DealPT>;
-
-    return keys.some((key) => dealFormData[key] !== originalDeal[key]);
+    return JSON.stringify(dealFormData) !== JSON.stringify(deal);
   }, [dealFormData, deal]);
 
   useEffect(() => {
-    if (dealCommentsContentRef.current) {
-      if (dealCommentsContentRef.current.clientHeight > 383) {
-        dealCommentsContentRef.current.classList.add("scroll");
-      } else {
-        dealCommentsContentRef.current.classList.remove("scroll");
-      }
-    }
+    setDealFormData(deal);
   }, [deal]);
+
+  useEffect(() => {
+    const commentsEl = dealCommentsContentRef.current;
+
+    if (commentsEl) {
+      const hasScroll = commentsEl.scrollHeight > commentsEl.clientHeight;
+      commentsEl.classList.toggle("scroll", hasScroll);
+    }
+  }, [dealFormData?.comments]);
 
   if (!deal || !dealFormData) {
     return <NotFound />;
@@ -328,7 +330,7 @@ function Deal() {
               setState={setComment}
               addComment={addComment}
               dealCommentsContentRef={dealCommentsContentRef}
-              deal={deal}
+              comments={dealFormData.comments}
             />
           </div>
 

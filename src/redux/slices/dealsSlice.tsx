@@ -45,18 +45,7 @@ export const dealsSlice = createSlice({
     setDeals: (state, action: PayloadAction<DealPT[]>) => {
       state.deals = action.payload;
     },
-    addCommentDeal: (
-      state,
-      action: PayloadAction<{ dealId: number; comment: string }>,
-    ) => {
-      const { dealId, comment } = action.payload;
 
-      const deal = state.deals.find((deal: DealPT) => deal.id === dealId);
-
-      if (deal) {
-        deal.comments.push(comment);
-      }
-    },
     updateDeal: (state, action: PayloadAction<DealPT>) => {
       const dealIdx = state.deals.findIndex(
         (deal: DealPT) => deal.id === action.payload.id,
@@ -69,6 +58,5 @@ export const dealsSlice = createSlice({
   },
 });
 
-export const { setDeals, addDeal, addCommentDeal, updateDeal } =
-  dealsSlice.actions;
+export const { setDeals, addDeal, updateDeal } = dealsSlice.actions;
 export default dealsSlice.reducer;
