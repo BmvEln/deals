@@ -261,7 +261,11 @@ function Deal() {
   }, []);
 
   const saveDeal = useCallback(() => {
-    if (dealFormData) dispatch(updateDeal(dealFormData));
+    if (dealFormData) {
+      dispatch(updateDeal(dealFormData));
+      originalDealRef.current = dealFormData;
+      setEditStates({});
+    }
   }, [dealFormData]);
 
   const cancelUpdate = useCallback(() => {
@@ -270,20 +274,13 @@ function Deal() {
   }, []);
 
   const isFieldChanges = useMemo(() => {
-    if (!dealFormData || !originalDealRef.current) {
-      return false;
-    }
+    if (!dealFormData || !originalDealRef.current) return false;
 
-    for (const key in originalDealRef.current) {
-      const typedKey = key as keyof DealPT;
+    const originalDeal = originalDealRef.current,
+      keys = Object.keys(originalDeal) as Array<keyof DealPT>;
 
-      if (dealFormData[typedKey] !== originalDealRef.current[typedKey]) {
-        return true;
-      }
-    }
-
-    return false;
-  }, [dealFormData]);
+    return keys.some((key) => dealFormData[key] !== originalDeal[key]);
+  }, [dealFormData, deal]);
 
   useEffect(() => {
     if (dealCommentsContentRef.current) {
