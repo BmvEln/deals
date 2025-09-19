@@ -214,12 +214,27 @@ function Deal() {
   const [comment, setComment] = useState("");
   const dealCommentsContentRef = useRef<HTMLDivElement>(null);
 
-  const toggleEdit = useCallback((fieldName: string) => {
-    setEditStates((prev) => ({
-      ...prev,
-      [fieldName]: !prev[fieldName],
-    }));
-  }, []);
+  const toggleEdit = useCallback(
+    (fieldName: keyof DealPT) => {
+      // Если поле было в режиме редактирования, сбрасываем его значение
+      if (editStates[fieldName]) {
+        setDealFormData((prev) => {
+          if (!prev || !originalDealRef.current) return prev;
+
+          return {
+            ...prev,
+            [fieldName]: originalDealRef.current[fieldName],
+          };
+        });
+      }
+
+      setEditStates((prev) => ({
+        ...prev,
+        [fieldName]: !prev[fieldName],
+      }));
+    },
+    [editStates],
+  );
 
   const addComment = useCallback(
     (e: React.KeyboardEvent<HTMLInputElement>) => {
