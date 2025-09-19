@@ -30,6 +30,7 @@ type InputBlockDataProps = {
   title: string;
   isSelect?: boolean;
   unit?: string;
+  noEdit?: boolean;
 };
 
 const INPUT_BLOCK_DATA: InputBlockDataProps[] = [
@@ -37,7 +38,7 @@ const INPUT_BLOCK_DATA: InputBlockDataProps[] = [
   { title: "Номер телефона", fieldName: "phone" },
   { title: "Бюджет", fieldName: "budget", unit: "руб." },
   { title: "ФИО", fieldName: "fullName" },
-  { title: "Дата создания", fieldName: "createdAt" },
+  { title: "Дата создания", fieldName: "createdAt", noEdit: true },
 ];
 // </editor-fold>
 
@@ -51,6 +52,7 @@ type InputBlockProps = {
   unit?: string | undefined;
   isEdit: boolean;
   onToggleEdit: () => void;
+  noEdit?: boolean;
 };
 
 function InputBlock({
@@ -62,6 +64,7 @@ function InputBlock({
   unit,
   isEdit,
   onToggleEdit,
+  noEdit,
 }: InputBlockProps) {
   const changeField = useCallback(
     (v: string | number) => {
@@ -98,7 +101,9 @@ function InputBlock({
     <div className="DealInputBlock">
       <div>
         <div>{title}</div>
-        <div onClick={onToggleEdit}>{isEdit ? "Отменить" : "Изменить"}</div>
+        {noEdit ? null : (
+          <div onClick={onToggleEdit}>{isEdit ? "Отменить" : "Изменить"}</div>
+        )}
       </div>
 
       {isEdit ? (
@@ -197,7 +202,6 @@ function StatusBlock({ status }: StatusBlockProps) {
 }
 // </editor-fold>
 
-// избавиться от стейта комментария
 function Deal() {
   const { id } = useParams();
   const dispatch = useAppDispatch();
@@ -210,6 +214,12 @@ function Deal() {
   const [editStates, setEditStates] = useState<Record<string, boolean>>({});
   const [comment, setComment] = useState("");
   const dealCommentsContentRef = useRef<HTMLDivElement>(null);
+
+  const isFieldChanges = useMemo(() => {
+    if (!dealFormData || !deal) return false;
+
+    return JSON.stringify(dealFormData) !== JSON.stringify(deal);
+  }, [dealFormData, deal]);
 
   const toggleEdit = useCallback(
     (fieldName: keyof DealPT) => {
@@ -275,12 +285,6 @@ function Deal() {
     setEditStates({});
   }, []);
 
-  const isFieldChanges = useMemo(() => {
-    if (!dealFormData || !deal) return false;
-
-    return JSON.stringify(dealFormData) !== JSON.stringify(deal);
-  }, [dealFormData, deal]);
-
   useEffect(() => {
     setDealFormData(deal);
   }, [deal]);
@@ -310,19 +314,22 @@ function Deal() {
 
           <div className="DealDivision">
             <div>
-              {INPUT_BLOCK_DATA.map(({ title, fieldName, unit, isSelect }) => (
-                <InputBlock
-                  key={fieldName}
-                  title={title}
-                  isSelect={isSelect}
-                  unit={unit}
-                  fieldName={fieldName}
-                  isEdit={!!editStates[fieldName]} // преобразуем undefined в false
-                  onToggleEdit={() => toggleEdit(fieldName)}
-                  value={dealFormData[fieldName as keyof DealPT] || ""}
-                  onChange={changeField}
-                />
-              ))}
+              {INPUT_BLOCK_DATA.map(
+                ({ title, fieldName, unit, isSelect, noEdit }) => (
+                  <InputBlock
+                    key={fieldName}
+                    title={title}
+                    isSelect={isSelect}
+                    unit={unit}
+                    fieldName={fieldName}
+                    isEdit={!!editStates[fieldName]} // преобразуем undefined в false
+                    onToggleEdit={() => toggleEdit(fieldName)}
+                    value={dealFormData[fieldName as keyof DealPT] || ""}
+                    onChange={changeField}
+                    noEdit={noEdit}
+                  />
+                ),
+              )}
             </div>
 
             <Comments
