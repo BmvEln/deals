@@ -108,10 +108,10 @@
       align-items: center;
 
       font-size: 24px;
-      line-height: 100%;
+      line-height: 130%;
 
       width: 100%;
-      height: 48px;
+      min-height: 48px;
       padding: 9px 16px 10px;
 
       color: #313131;
@@ -164,7 +164,6 @@
       flex-direction: column;
 
       max-height: 384px;
-      overflow: hidden;
 
       > div:not(.notContent) {
         display: flex;
@@ -172,12 +171,14 @@
         flex-shrink: 0;
 
         font-size: 24px;
-        line-height: 100%;
+        line-height: 130%;
 
-        padding: 0 24px;
-        height: 65px;
+        padding: 12px 24px;
+        min-height: 65px;
 
         background-color: #f4f4f4;
+
+        white-space: wrap;
       }
 
       &.scroll {
