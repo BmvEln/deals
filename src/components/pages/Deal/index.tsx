@@ -101,6 +101,11 @@ function InputBlock({
           return;
         }
 
+        if (fieldName === "budget") {
+          changeField(v.replace(/\D/g, ""));
+          return;
+        }
+
         changeField(v);
       }}
       autoFocus
