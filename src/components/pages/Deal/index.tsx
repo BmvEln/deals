@@ -23,6 +23,7 @@ import Input from "../../controls/Input";
 import Select from "../../controls/Select";
 import Button from "../../controls/Button";
 import NotFound from "../NotFound";
+import { formatPhoneNumber } from "../../../functions.ts";
 
 // <editor-fold desc="Типы и константы">
 type InputBlockDataProps = {
@@ -35,7 +36,10 @@ type InputBlockDataProps = {
 
 const INPUT_BLOCK_DATA: InputBlockDataProps[] = [
   { title: "Статус", fieldName: "status", isSelect: true },
-  { title: "Номер телефона", fieldName: "phone" },
+  {
+    title: "Номер телефона",
+    fieldName: "phone",
+  },
   { title: "Бюджет", fieldName: "budget", unit: "руб." },
   { title: "ФИО", fieldName: "fullName" },
   { title: "Дата создания", fieldName: "createdAt", noEdit: true },
@@ -92,7 +96,14 @@ function InputBlock({
     <Input
       style={{ height: "48px" }}
       value={String(value || "")}
-      onChange={(v: string) => changeField(v)}
+      onChange={(v: string) => {
+        if (fieldName === "phone") {
+          changeField(formatPhoneNumber(v));
+          return;
+        }
+
+        changeField(v);
+      }}
       autoFocus
     />
   );
