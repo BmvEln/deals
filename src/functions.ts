@@ -1,6 +1,10 @@
-import type { DealPT } from "./types.ts";
-
-export function generateNewId(items: DealPT[]) {
+/**
+ * Генерирует новый ID, который на 1 больше максимального ID в массиве.
+ * Работает с любым массивом объектов, у которых есть свойство 'id: number'.
+ * @param items Массив объектов (например, сделок или комментариев).
+ * @returns Новый ID (число).
+ */
+export function generateNewId<T extends { id: number }>(items: T[]): number {
   const maxId = items.reduce((max, item) => Math.max(max, item.id), 0);
   return maxId + 1;
 }

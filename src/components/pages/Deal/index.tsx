@@ -10,7 +10,7 @@ import { useAppDispatch, useAppSelector } from "../../../redux/store.tsx";
 
 import "./style.less";
 
-import type { DealPT } from "../../../types.ts";
+import type { CommentPT, DealPT } from "../../../types.ts";
 import {
   DEAL_STATUS_KEYS,
   DEAL_STATUSES_CONFIG,
@@ -18,12 +18,13 @@ import {
 } from "../../../static/deals.ts";
 import { updateDeal } from "../../../redux/slices/dealsSlice.tsx";
 
+import { formatPhoneNumber, generateNewId } from "../../../functions.ts";
+
 import Header from "../../layout/Header";
 import Input from "../../controls/Input";
 import Select from "../../controls/Select";
 import Button from "../../controls/Button";
 import NotFound from "../NotFound";
-import { formatPhoneNumber } from "../../../functions.ts";
 
 // <editor-fold desc="Типы и константы">
 type InputBlockDataProps = {
@@ -36,10 +37,7 @@ type InputBlockDataProps = {
 
 const INPUT_BLOCK_DATA: InputBlockDataProps[] = [
   { title: "Статус", fieldName: "status", isSelect: true },
-  {
-    title: "Номер телефона",
-    fieldName: "phone",
-  },
+  { title: "Номер телефона", fieldName: "phone" },
   { title: "Бюджет", fieldName: "budget", unit: "руб." },
   { title: "ФИО", fieldName: "fullName" },
   { title: "Дата создания", fieldName: "createdAt", noEdit: true },
@@ -50,7 +48,7 @@ const INPUT_BLOCK_DATA: InputBlockDataProps[] = [
 type InputBlockProps = {
   title: string;
   isSelect?: boolean;
-  value: number | string | string[];
+  value: number | string | CommentPT[];
   onChange: (fieldName: keyof DealPT, newValue: any) => void;
   fieldName: keyof DealPT;
   unit?: string | undefined;
@@ -125,7 +123,9 @@ function InputBlock({
             ? DEAL_STATUSES_CONFIG[value].name
             : unit && value
               ? `${value} ${unit}`
-              : value}
+              : Array.isArray(value)
+                ? null
+                : value}
         </div>
       )}
     </div>
@@ -137,7 +137,8 @@ type CommentsProps = {
   setState: (state: string) => void;
   addComment: (e: React.KeyboardEvent<HTMLInputElement>) => void;
   dealCommentsContentRef: React.Ref<HTMLDivElement>;
-  comments: string[] | [];
+  comments: CommentPT[] | [];
+  removeComment: (id: number) => void;
 };
 
 function Comments({
@@ -146,6 +147,7 @@ function Comments({
   addComment,
   dealCommentsContentRef,
   comments,
+  removeComment,
 }: CommentsProps) {
   return (
     <div>
@@ -167,11 +169,14 @@ function Comments({
               style={{ fontSize: "24px", lineHeight: "130%" }}
               className="notContent"
             >
-              Комментария не добавлены
+              Комментарии не добавлены
             </div>
           ) : (
-            comments.map((comment: string, i: number) => (
-              <div key={i}>{comment}</div>
+            comments.map(({ id, text }: CommentPT) => (
+              <div key={id}>
+                <div>{text}</div>
+                <div onClick={() => removeComment(id)}>✕</div>
+              </div>
             ))
           )}
         </div>
@@ -262,7 +267,10 @@ function Deal() {
 
           return {
             ...prev,
-            comments: [...(prev.comments || []), comment],
+            comments: [
+              ...(prev.comments || []),
+              { id: generateNewId(prev.comments), text: comment },
+            ],
           };
         });
         setComment("");
@@ -270,6 +278,17 @@ function Deal() {
     },
     [comment],
   );
+
+  const removeComment = useCallback((id: number) => {
+    setDealFormData((prev: DealPT | undefined) => {
+      if (!prev) return prev;
+
+      return {
+        ...prev,
+        comments: prev.comments.filter((c: CommentPT) => c.id !== id),
+      };
+    });
+  }, []);
 
   const changeField = useCallback((field: keyof DealPT, newValue: any) => {
     setDealFormData((prev) => {
@@ -315,7 +334,7 @@ function Deal() {
 
   return (
     <>
-      <Header>{deal.name}</Header>
+      <Header>Сделка</Header>
 
       <div className="Deal">
         <div className="DealContent">
@@ -347,6 +366,7 @@ function Deal() {
               state={comment}
               setState={setComment}
               addComment={addComment}
+              removeComment={removeComment}
               dealCommentsContentRef={dealCommentsContentRef}
               comments={dealFormData.comments}
             />

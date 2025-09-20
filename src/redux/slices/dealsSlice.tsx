@@ -11,14 +11,7 @@ const initialState: { deals: DealPT[] } = {
       budget: undefined,
       fullName: undefined,
       createdAt: "01.02.2024",
-      comments: [
-        "Текст комментария",
-        "Текст комментария",
-        "Текст комментария",
-        "Текст комментария",
-        "Текст комментария",
-        "Текст комментария",
-      ],
+      comments: [{ id: 1, text: "Текст комментария" }],
     },
     {
       id: 2,
