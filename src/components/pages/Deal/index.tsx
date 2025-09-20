@@ -5,7 +5,7 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { useParams } from "react-router-dom";
+import { Navigate, useNavigate, useParams } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "../../../redux/store.tsx";
 
 import "./style.less";
@@ -16,7 +16,7 @@ import {
   DEAL_STATUSES_CONFIG,
   DEAL_STATUSES_LIST,
 } from "../../../static/deals.ts";
-import { updateDeal } from "../../../redux/slices/dealsSlice.tsx";
+import { removeDeal, updateDeal } from "../../../redux/slices/dealsSlice.tsx";
 
 import { formatPhoneNumber, generateNewId } from "../../../functions.ts";
 
@@ -25,6 +25,7 @@ import Input from "../../controls/Input";
 import Select from "../../controls/Select";
 import Button from "../../controls/Button";
 import NotFound from "../NotFound";
+import { DEALS_LINK } from "../../../static/static.ts";
 
 // <editor-fold desc="Типы и константы">
 type InputBlockDataProps = {
@@ -221,6 +222,7 @@ function StatusBlock({ status }: StatusBlockProps) {
 function Deal() {
   const { id } = useParams();
   const dispatch = useAppDispatch();
+  const navigate = useNavigate();
 
   const { deals } = useAppSelector((state) => state.deals),
     deal = deals.find((deal: DealPT) => id === String(deal.id));
@@ -310,6 +312,11 @@ function Deal() {
     }
   }, [dealFormData]);
 
+  const handleRemoveDeal = useCallback((id: number) => {
+    dispatch(removeDeal(id));
+    navigate(DEALS_LINK);
+  }, []);
+
   const cancelUpdate = useCallback(() => {
     setDealFormData(deal);
     setEditStates({});
@@ -338,7 +345,15 @@ function Deal() {
 
       <div className="Deal">
         <div className="DealContent">
-          <div className="DealHeading">{deal.name}</div>
+          <div className="DealHeading">
+            <div>{deal.name}</div>
+            <div
+              title="Удалить сделку"
+              onClick={() => handleRemoveDeal(Number(id))}
+            >
+              ✕
+            </div>
+          </div>
 
           <StatusBlock status={deal.status} />
 

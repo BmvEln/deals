@@ -12,10 +12,25 @@
   }
 
   &Heading {
+    position: relative;
+
     font-size: 36px;
     line-height: 130%;
 
     margin-bottom: 12px;
+
+    > div:first-child {
+      padding-right: 50px;
+    }
+
+    > div:last-child {
+      position: absolute;
+      top: 0;
+      right: 0;
+
+      opacity: 0.5;
+      cursor: pointer;
+    }
   }
 
   &Status {
