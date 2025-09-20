@@ -5,7 +5,7 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { Navigate, useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "../../../redux/store.tsx";
 
 import "./style.less";
@@ -217,6 +217,58 @@ function StatusBlock({ status }: StatusBlockProps) {
     </div>
   );
 }
+
+type HeadingProps = {
+  id: number;
+  deal: DealPT;
+  dealFormData: DealPT;
+  editStates: Record<string, boolean>;
+  toggleEdit: (fieldName: keyof DealPT) => void;
+  handleRemoveDeal: (id: number) => void;
+  changeField: (fieldName: keyof DealPT, v: string) => void;
+};
+
+function Heading({
+  id,
+  deal,
+  dealFormData,
+  editStates,
+  toggleEdit,
+  handleRemoveDeal,
+  changeField,
+}: HeadingProps) {
+  return (
+    <div className="DealHeading">
+      <div>
+        {editStates["name"] ? (
+          <Input
+            style={{ width: "400px" }}
+            value={dealFormData["name"]}
+            onChange={(v) => changeField("name", v)}
+            onKeyDown={(e) =>
+              e.key === "Enter" ? toggleEdit("name") : undefined
+            }
+          />
+        ) : (
+          <span>{deal.name}</span>
+        )}
+
+        {editStates["name"] ? null : (
+          <span
+            title="Редактировать название"
+            onClick={() => toggleEdit("name")}
+          >
+            &#x270e;
+          </span>
+        )}
+      </div>
+      <div title="Удалить сделку" onClick={() => handleRemoveDeal(id)}>
+        &#128465;
+      </div>
+    </div>
+  );
+}
+
 // </editor-fold>
 
 function Deal() {
@@ -320,7 +372,7 @@ function Deal() {
   const cancelUpdate = useCallback(() => {
     setDealFormData(deal);
     setEditStates({});
-  }, []);
+  }, [deal]);
 
   useEffect(() => {
     setDealFormData(deal);
@@ -345,15 +397,15 @@ function Deal() {
 
       <div className="Deal">
         <div className="DealContent">
-          <div className="DealHeading">
-            <div>{deal.name}</div>
-            <div
-              title="Удалить сделку"
-              onClick={() => handleRemoveDeal(Number(id))}
-            >
-              ✕
-            </div>
-          </div>
+          <Heading
+            id={Number(id)}
+            deal={deal}
+            changeField={changeField}
+            dealFormData={dealFormData}
+            handleRemoveDeal={handleRemoveDeal}
+            editStates={editStates}
+            toggleEdit={toggleEdit}
+          />
 
           <StatusBlock status={deal.status} />
 
